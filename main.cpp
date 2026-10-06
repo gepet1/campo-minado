@@ -1,62 +1,93 @@
 #include <iostream>
+#include <sstream>
 #include <string>
-#include "celula.h"
+#include "tabuleiro.h"
 
-// Mostra o resultado de um teste: OK se a condicao for verdadeira, FALHOU caso contrario.
-// Tambem conta as falhas, para o resumo no final.
+// Conta as falhas, para o resumo no final.
 int falhas = 0;
 
-void confere(const std::string& descricao, bool condicao) {
-  if (condicao) {
+// Executa a impressao do tabuleiro e devolve, como string, o que ela escreveria na tela.
+// Para isso, a saida do cout e desviada temporariamente para uma string.
+std::string capturar_impressao(const Tabuleiro& t) {
+  std::ostringstream saida;
+  std::streambuf* original = std::cout.rdbuf(saida.rdbuf());
+  t.imprimir_tabuleiro();
+  std::cout.rdbuf(original);
+  return saida.str();
+}
+
+// Remove os espacos no fim de cada linha e as linhas vazias no comeco e no fim.
+// Assim, um espaco sobrando depois do ultimo # nao conta como erro.
+std::string limpar(const std::string& texto) {
+  std::istringstream entrada(texto);
+  std::string linha;
+  std::string resultado;
+  while (std::getline(entrada, linha)) {
+    while (!linha.empty() && linha.back() == ' ')
+      linha.pop_back();
+    if (linha.empty() && resultado.empty())
+      continue;
+    resultado += linha + '\n';
+  }
+  while (!resultado.empty() && resultado.back() == '\n')
+    resultado.pop_back();
+  return resultado;
+}
+
+// Compara a impressao do tabuleiro com o texto esperado e mostra OK ou FALHOU.
+// Em caso de falha, mostra o esperado e o obtido, um abaixo do outro.
+void confere_impressao(const std::string& descricao, const Tabuleiro& t, const std::string& esperado) {
+  std::string obtido = limpar(capturar_impressao(t));
+  if (obtido == esperado) {
     std::cout << "OK      - " << descricao << '\n';
   } else {
     std::cout << "FALHOU  - " << descricao << '\n';
+    std::cout << "Esperado:\n" << esperado << '\n';
+    std::cout << "Obtido:\n" << obtido << "\n\n";
     falhas++;
   }
 }
 
 int main() {
-  // Teste 1: uma celula recem-criada deve comecar vazia, oculta e sem bandeira.
-  Celula c;
-  confere("celula nova nao tem mina", c.tem_mina() == false);
-  confere("celula nova tem 0 minas vizinhas", c.verificar_vizinhas() == 0);
-  confere("celula nova nao esta revelada", c.esta_revelada() == false);
-  confere("celula nova nao tem bandeira", c.verificar_flag() == false);
+  // Parte 1: o tabuleiro Iniciante na tela, para conferir a olho.
+  std::cout << "Tabuleiro Iniciante (9x9, 10 minas):\n\n";
+  Tabuleiro iniciante(9, 9, 10);
+  iniciante.imprimir_tabuleiro();
+  std::cout << '\n';
 
-  // Teste 2: colocar e tirar a mina.
-  c.definir_mina(true);
-  confere("depois de definir_mina(true), tem mina", c.tem_mina() == true);
-  c.definir_mina(false);
-  confere("depois de definir_mina(false), nao tem mina", c.tem_mina() == false);
+  // Parte 2: comparacao automatica com o formato do roteiro.
 
-  // Teste 3: definir o numero de minas vizinhas.
-  c.definir_vizinhas(3);
-  confere("depois de definir_vizinhas(3), a consulta devolve 3", c.verificar_vizinhas() == 3);
+  // Teste 1: um tabuleiro 3x3, igual ao desenho do roteiro.
+  confere_impressao("tabuleiro 3x3", Tabuleiro(3, 3, 1),
+                    "  0 1 2\n"
+                    "0 # # #\n"
+                    "1 # # #\n"
+                    "2 # # #");
 
-  // Teste 4: um valor invalido (fora de 0 a 8) nao deve alterar o numero guardado.
-  c.definir_vizinhas(9);
-  confere("definir_vizinhas(9) e ignorado e o valor continua 3", c.verificar_vizinhas() == 3);
-  c.definir_vizinhas(-1);
-  confere("definir_vizinhas(-1) e ignorado e o valor continua 3", c.verificar_vizinhas() == 3);
+  // Teste 2: 2 linhas e 5 colunas. Se linhas e colunas estiverem trocadas
+  // no construtor ou na impressao, este teste falha.
+  confere_impressao("tabuleiro com 2 linhas e 5 colunas", Tabuleiro(2, 5, 1),
+                    "  0 1 2 3 4\n"
+                    "0 # # # # #\n"
+                    "1 # # # # #");
 
-  // Teste 5: a bandeira alterna a cada chamada.
-  c.set_flag();
-  confere("depois de um set_flag, tem bandeira", c.verificar_flag() == true);
-  c.set_flag();
-  confere("depois de dois set_flag, nao tem bandeira", c.verificar_flag() == false);
+  // Teste 3: o menor tabuleiro possivel.
+  confere_impressao("tabuleiro 1x1", Tabuleiro(1, 1, 0),
+                    "  0\n"
+                    "0 #");
 
-  // Teste 6: uma celula com bandeira nao pode ser revelada.
-  c.set_flag();
-  confere("revelar com bandeira devolve false", c.revelar() == false);
-  confere("com bandeira, a celula continua oculta", c.esta_revelada() == false);
-
-  // Teste 7: sem bandeira, a celula e revelada.
-  c.set_flag();
-  confere("revelar sem bandeira devolve true", c.revelar() == true);
-  confere("depois de revelar, a celula esta revelada", c.esta_revelada() == true);
-
-  // Teste 8: revelar de novo uma celula ja revelada devolve false.
-  confere("revelar uma celula ja revelada devolve false", c.revelar() == false);
+  // Teste 4: o tabuleiro Iniciante completo.
+  confere_impressao("tabuleiro Iniciante 9x9", iniciante,
+                    "  0 1 2 3 4 5 6 7 8\n"
+                    "0 # # # # # # # # #\n"
+                    "1 # # # # # # # # #\n"
+                    "2 # # # # # # # # #\n"
+                    "3 # # # # # # # # #\n"
+                    "4 # # # # # # # # #\n"
+                    "5 # # # # # # # # #\n"
+                    "6 # # # # # # # # #\n"
+                    "7 # # # # # # # # #\n"
+                    "8 # # # # # # # # #");
 
   // Resumo final.
   std::cout << '\n';
