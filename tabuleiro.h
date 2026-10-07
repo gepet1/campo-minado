@@ -12,10 +12,10 @@ private:
   bool revelou_mina;
   
   bool verificar_posicao(int linha,int coluna) const;
-  void sortear_mina();
+  void sortear_mina(unsigned int semente);
   int calcular_vizinhas();
 public:
-  Tabuleiro(int linhas,int coluas, int minas);
+  Tabuleiro(int linhas,int coluas, int minas, unsigned int semente);
   
   void imprimir_tabuleiro() const; 
   int minas_faltando();
@@ -23,6 +23,7 @@ public:
   bool colocar_flag(int linha,int coluna);
   bool vitoria();
   bool derrota();
+  void imprimir_revelado() const;
 };
 
 #endif
