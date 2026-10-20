@@ -13,12 +13,12 @@ private:
   
   bool verificar_posicao(int linha,int coluna) const;
   void sortear_mina(unsigned int semente);
-  int calcular_vizinhas();
+  void calcular_vizinhas();
 public:
-  Tabuleiro(int linhas,int coluas, int minas, unsigned int semente);
+  Tabuleiro(int linhas,int colunas, int minas, unsigned int semente);
   
   void imprimir_tabuleiro() const; 
-  int minas_faltando();
+  int minas_faltando() const;
   void revelacao(int linha,int coluna);
   bool colocar_flag(int linha,int coluna);
   bool vitoria();

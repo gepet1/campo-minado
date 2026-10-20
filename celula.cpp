@@ -1,12 +1,12 @@
 #include <iostream>
 #include "celula.h"
 
-Celula::Celula(){
-  mina=false;
-  minas_vizinhas=0;
-  revelada=false;
-  flag=false;
-}
+Celula::Celula() :
+  mina(false),
+  minas_vizinhas(0),
+  revelada(false),
+  flag(false)
+{};
 
 bool Celula::tem_mina() const{
   if(mina)

@@ -3,16 +3,11 @@
 #include <vector>
 #include <random>
 
-Tabuleiro::Tabuleiro(int linhas,int colunas, int minas,unsigned int semente) {
-  for(int i=0; i<linhas; i++) {
-    matriz.push_back(std::vector<Celula> ());
-    for(int j=0; j<colunas; j++)
-      matriz[i].push_back(Celula());
-  }
-  num_minas=minas;
-  num_bandeiras=0;
-  revelou_mina=false;
+Tabuleiro::Tabuleiro(int linhas, int colunas, int minas, unsigned int semente)
+  : matriz(linhas, std::vector<Celula>(colunas)), num_minas(minas),
+    num_bandeiras(0), revelou_mina(false) {
   sortear_mina(semente);
+  calcular_vizinhas();
 }
 
 void Tabuleiro::sortear_mina(unsigned int semente) {
@@ -73,4 +68,36 @@ void Tabuleiro::imprimir_revelado() const {
     }
     std::cout << '\n';
   }    
+}
+
+bool Tabuleiro::verificar_posicao(int linha, int coluna) const {
+  int x = static_cast<int>(matriz[0].size());
+  int y = static_cast<int>(matriz.size());
+
+  if((linha>=0 && linha<y) && (coluna>=0 && coluna<x))
+    return true;
+  return false;  
+
+}
+
+void Tabuleiro::calcular_vizinhas() {
+  int x[]={1,-1,0,0,-1,1,1,-1};
+  int y[]={0,0,-1,1,1,-1,1,-1};
+
+  int linhas = static_cast<int>(matriz.size());
+  int colunas = static_cast<int>(matriz[0].size());
+
+  for(int i=0; i<linhas; i++) {
+    for(int j=0; j<colunas; j++) {
+      int bombas=0;
+      int dx,dy;
+      for(int k=0; k<8;k++) {
+        dx=x[k]+j;
+        dy=y[k]+i;  
+        if(verificar_posicao(dy,dx) && matriz[dy][dx].tem_mina())
+          bombas++;
+      } 
+    matriz[i][j].definir_vizinhas(bombas);
+    }
+  }
 }
