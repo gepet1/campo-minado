@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 #include "tabuleiro.h"
 
 // Conta as falhas, para o resumo no final.
@@ -47,11 +48,11 @@ std::string limpar(const std::string& texto) {
   return resultado;
 }
 
-// Conta quantos '*' (minas) aparecem num texto.
-int contar_minas(const std::string& texto) {
+// Conta quantas vezes um caractere aparece num texto.
+int contar(const std::string& texto, char simbolo) {
   int total = 0;
   for (char c : texto)
-    if (c == '*')
+    if (c == simbolo)
       total++;
   return total;
 }
@@ -68,15 +69,60 @@ void confere_texto(const std::string& descricao, const std::string& obtido, cons
   }
 }
 
+// Le uma impressao (normal ou revelada) e devolve so os simbolos das celulas,
+// sem os numeros das bordas: grade[l][c] e o simbolo da linha l, coluna c.
+std::vector<std::vector<char>> ler_grade(const std::string& texto) {
+  std::vector<std::vector<char>> grade;
+  std::istringstream entrada(limpar(texto));
+  std::string linha;
+  std::getline(entrada, linha);  // descarta a linha com os numeros das colunas
+  while (std::getline(entrada, linha)) {
+    std::istringstream partes(linha);
+    std::string rotulo;
+    std::string simbolo;
+    partes >> rotulo;  // descarta o numero da linha
+    std::vector<char> celulas;
+    while (partes >> simbolo)
+      celulas.push_back(simbolo[0]);
+    grade.push_back(celulas);
+  }
+  return grade;
+}
+
+// Confere, no tabuleiro revelado, se cada celula sem mina mostra exatamente
+// a quantidade de '*' nas 8 vizinhas ('.' quando essa quantidade e 0).
+bool vizinhas_corretas(const Tabuleiro& t) {
+  std::vector<std::vector<char>> g = ler_grade(capturar(t, true));
+  int linhas = static_cast<int>(g.size());
+  for (int l = 0; l < linhas; l++) {
+    int colunas = static_cast<int>(g[l].size());
+    for (int c = 0; c < colunas; c++) {
+      if (g[l][c] == '*')
+        continue;
+      int minas = 0;
+      for (int dl = -1; dl <= 1; dl++)
+        for (int dc = -1; dc <= 1; dc++) {
+          int nl = l + dl;
+          int nc = c + dc;
+          if ((dl != 0 || dc != 0) && nl >= 0 && nl < linhas && nc >= 0 && nc < colunas && g[nl][nc] == '*')
+            minas++;
+        }
+      char esperado = (minas == 0) ? '.' : static_cast<char>('0' + minas);
+      if (g[l][c] != esperado)
+        return false;
+    }
+  }
+  return true;
+}
+
 int main() {
   // Na tela: o tabuleiro Iniciante revelado com a semente 42, para conferir a olho.
-  // Ele e o unico tabuleiro revelado impresso, entao o grep do roteiro deve contar 10.
   std::cout << "Tabuleiro Iniciante revelado (9x9, 10 minas, semente 42):\n\n";
   Tabuleiro iniciante(9, 9, 10, 42);
   iniciante.imprimir_revelado();
   std::cout << '\n';
 
-  // Parte 1 (03/10): a impressao normal continua mostrando tudo oculto, mesmo com minas.
+  // Parte 1 (03/10): a impressao normal mostra tudo oculto, mesmo com minas.
 
   // Teste 1: um tabuleiro 3x3.
   confere_texto("impressao normal do 3x3 continua oculta", limpar(capturar(Tabuleiro(3, 3, 1, 42), false)),
@@ -112,7 +158,7 @@ int main() {
   // Parte 2 (06/10): sorteio das minas e impressao revelada.
 
   // Teste 5: o Iniciante tem exatamente 10 minas.
-  confere("Iniciante com semente 42 tem exatamente 10 minas", contar_minas(capturar(iniciante, true)) == 10);
+  confere("Iniciante com semente 42 tem exatamente 10 minas", contar(capturar(iniciante, true), '*') == 10);
 
   // Teste 6: a mesma semente gera o mesmo tabuleiro.
   Tabuleiro a(9, 9, 10, 42);
@@ -123,22 +169,20 @@ int main() {
   Tabuleiro c(9, 9, 10, 7);
   confere("sementes diferentes (42 e 7) geram tabuleiros diferentes", capturar(a, true) != capturar(c, true));
 
-  // Teste 8: com muitas minas, as posicoes repetidas aparecem com frequencia.
-  // Se o sorteio nao conferir se a celula ja tem mina, a contagem fica abaixo de 99.
+  // Teste 8: com muitas minas, posicoes repetidas aparecem com frequencia.
   Tabuleiro especialista(16, 30, 99, 42);
-  confere("Especialista (16x30) tem exatamente 99 minas", contar_minas(capturar(especialista, true)) == 99);
+  confere("Especialista (16x30) tem exatamente 99 minas", contar(capturar(especialista, true), '*') == 99);
 
   // Teste 9: varias sementes no Iniciante, todas com exatamente 10 minas.
   bool todas_com_10 = true;
   for (unsigned int semente = 1; semente <= 20; semente++) {
     Tabuleiro t(9, 9, 10, semente);
-    if (contar_minas(capturar(t, true)) != 10)
+    if (contar(capturar(t, true), '*') != 10)
       todas_com_10 = false;
   }
   confere("sementes de 1 a 20 geram, todas, exatamente 10 minas", todas_com_10);
 
-  // Teste 10: tabuleiro cheio (6 minas em 6 celulas). O sorteio precisa terminar
-  // e a impressao revelada precisa seguir o mesmo formato da normal.
+  // Teste 10: tabuleiro cheio (6 minas em 6 celulas).
   confere_texto("tabuleiro 2x3 cheio de minas, revelado", limpar(capturar(Tabuleiro(2, 3, 6, 42), true)),
                 "  0 1 2\n"
                 "0 * * *\n"
@@ -149,6 +193,92 @@ int main() {
                 "  0 1 2\n"
                 "0 . . .\n"
                 "1 . . .");
+
+  // Parte 3 (09/10): contagem das minas vizinhas.
+  // Cada numero do tabuleiro revelado e comparado com a contagem de '*' em volta dele.
+
+  // Teste 12: o Iniciante, com cantos, bordas e meio.
+  confere("vizinhas do Iniciante (semente 42) batem com os '*' em volta", vizinhas_corretas(iniciante));
+
+  // Teste 13: o Especialista, que nao e quadrado e tem muitas minas.
+  confere("vizinhas do Especialista batem com os '*' em volta", vizinhas_corretas(especialista));
+
+  // Teste 14: um tabuleiro quase cheio, em que quase toda vizinha e mina.
+  confere("vizinhas do 3x3 com 8 minas batem com os '*' em volta", vizinhas_corretas(Tabuleiro(3, 3, 8, 42)));
+
+  // Teste 15: varias sementes no Iniciante.
+  bool todas_corretas = true;
+  for (unsigned int semente = 1; semente <= 20; semente++) {
+    Tabuleiro t(9, 9, 10, semente);
+    if (!vizinhas_corretas(t))
+      todas_corretas = false;
+  }
+  confere("vizinhas corretas com as sementes de 1 a 20", todas_corretas);
+
+  // Parte 4 (10/10): revelar, bandeira e impressao conforme o estado de cada celula.
+  // O teste usa o tabuleiro revelado para saber onde ha celulas sem mina.
+  Tabuleiro jogo(9, 9, 10, 42);
+  std::vector<std::vector<char>> mapa = ler_grade(capturar(jogo, true));
+  int sl = -1, sc = -1;  // primeira celula sem mina, em ordem de leitura
+  int tl = -1, tc = -1;  // ultima celula sem mina, em ordem de leitura
+  for (int l = 0; l < 9; l++)
+    for (int c = 0; c < 9; c++)
+      if (mapa[l][c] != '*') {
+        if (sl == -1) {
+          sl = l;
+          sc = c;
+        }
+        tl = l;
+        tc = c;
+      }
+
+  // Teste 16: revelar uma celula sem mina mostra o numero dela (ou '.') e mais nada.
+  jogo.revelacao(sl, sc);
+  std::string normal = capturar(jogo, false);
+  confere("revelar uma celula sem mina mostra o simbolo dela",
+          ler_grade(normal)[sl][sc] == mapa[sl][sc] && contar(normal, '#') == 80);
+
+  // Teste 17: por bandeira numa celula oculta mostra F e diminui as minas restantes.
+  jogo.colocar_flag(tl, tc);
+  confere("bandeira numa celula oculta aparece como F", ler_grade(capturar(jogo, false))[tl][tc] == 'F');
+  confere("com uma bandeira, minas_faltando() passa de 10 para 9", jogo.minas_faltando() == 9);
+
+  // Teste 18: uma celula com bandeira nao pode ser revelada.
+  jogo.revelacao(tl, tc);
+  confere("revelar uma celula com bandeira nao muda nada", ler_grade(capturar(jogo, false))[tl][tc] == 'F');
+
+  // Teste 19: por bandeira de novo tira a bandeira.
+  jogo.colocar_flag(tl, tc);
+  confere("tirar a bandeira volta a mostrar #", ler_grade(capturar(jogo, false))[tl][tc] == '#');
+  confere("sem bandeiras, minas_faltando() volta a 10", jogo.minas_faltando() == 10);
+
+  // Teste 20: nao se pode por bandeira numa celula ja revelada.
+  jogo.colocar_flag(sl, sc);
+  confere("bandeira numa celula revelada nao muda nada",
+          ler_grade(capturar(jogo, false))[sl][sc] == mapa[sl][sc] && jogo.minas_faltando() == 10);
+
+  // Teste 21: revelar de novo uma celula ja revelada nao muda nada.
+  std::string antes = capturar(jogo, false);
+  jogo.revelacao(sl, sc);
+  confere("revelar de novo uma celula revelada nao muda nada", capturar(jogo, false) == antes);
+
+  // Teste 22: revelar fora do tabuleiro nao muda nada (nem trava o programa).
+  jogo.revelacao(-1, 0);
+  jogo.revelacao(9, 0);
+  jogo.revelacao(0, -1);
+  jogo.revelacao(0, 9);
+  confere("revelar fora do tabuleiro nao muda nada", capturar(jogo, false) == antes);
+
+  // Teste 23: bandeira fora do tabuleiro. Este e o ultimo teste porque, se o
+  // colocar_flag nao conferir a posicao, o programa pode travar aqui.
+  std::cout << "(testando bandeira fora do tabuleiro; se o programa parar logo depois desta linha, "
+               "o colocar_flag nao confere a posicao)" << std::endl;
+  jogo.colocar_flag(-1, 0);
+  jogo.colocar_flag(9, 0);
+  jogo.colocar_flag(0, -1);
+  jogo.colocar_flag(0, 9);
+  confere("bandeira fora do tabuleiro nao muda nada",
+          capturar(jogo, false) == antes && jogo.minas_faltando() == 10);
 
   // Resumo final.
   std::cout << '\n';

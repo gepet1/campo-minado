@@ -110,9 +110,10 @@ void Tabuleiro::revelacao(int linha, int coluna) {
 }
 
 bool Tabuleiro::colocar_flag(int linha, int coluna) {
-  if(!matriz[linha][coluna].esta_revelada()) {
+  if(!matriz[linha][coluna].esta_revelada() && verificar_posicao(linha,coluna)) {
+    if(!matriz[linha][coluna].verificar_flag())
+      num_bandeiras++;
     matriz[linha][coluna].set_flag();
-    num_bandeiras++;
     return true;
   }
   return false;  
