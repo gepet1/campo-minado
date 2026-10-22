@@ -101,3 +101,24 @@ void Tabuleiro::calcular_vizinhas() {
     }
   }
 }
+
+void Tabuleiro::revelacao(int linha, int coluna) {
+  if(verificar_posicao(linha,coluna)){
+    if(matriz[linha][coluna].revelar() && matriz[linha][coluna].tem_mina())
+      revelou_mina=true;
+  }
+}
+
+bool Tabuleiro::colocar_flag(int linha, int coluna) {
+  if(!matriz[linha][coluna].esta_revelada()) {
+    matriz[linha][coluna].set_flag();
+    num_bandeiras++;
+    return true;
+  }
+  return false;  
+}
+
+
+int Tabuleiro::minas_faltando() const {
+  return num_minas-num_bandeiras;
+}
