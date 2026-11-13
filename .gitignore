@@ -1,3 +1,9 @@
-campo-minado
+/campo-minado
+/campo-minado-debug
+/teste
+/experimento
+a.out
 *.o
+recordes.txt
+testes/recordes_teste.txt
 .vscode/

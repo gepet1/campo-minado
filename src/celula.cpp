@@ -41,7 +41,7 @@ void Celula::definir_vizinhas(int x){
   if(x<=8 && x>=0)
     minas_vizinhas=x;
   else {
-    std::cerr << "ERRO! Valor invalido para minas vizinhas.";
+    std::cerr << "ERRO! Valor invalido para minas vizinhas.\n";
   }
 }
 
