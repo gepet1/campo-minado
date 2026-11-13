@@ -1,6 +1,6 @@
-# Minesweeper
+# Campo Minado
 
-A terminal version of the classic Minesweeper game, written in C++. The player must figure out which cells hide a mine and which are safe, until every safe cell has been revealed. This is a study project, made for learning purposes. Hope you enjoy it!
+Uma versão para terminal do clássico jogo Campo Minado, escrita em C++. O jogador precisa descobrir quais células escondem uma mina e quais são seguras, até que todas as células seguras tenham sido reveladas. Este é um projeto de estudo, feito com fins de aprendizado. Espero que goste!
 
 ```
 Level: Beginner    Mines left: 9
@@ -19,96 +19,96 @@ Level: Beginner    Mines left: 9
 Command (r L C, f L C, q):
 ```
 
-## How to compile and play
+## Como compilar e jogar
 
-You need `g++` (C++17) and `make`, on Linux or WSL.
+É preciso ter o `g++` (C++17) e o `make`, no Linux ou no WSL.
 
 ```
-make        # compiles the game
-make run    # compiles and starts the game
-make test   # compiles and runs the automatic tests
-make clean  # removes the compiled files
+make        # compila o jogo
+make run    # compila e inicia o jogo
+make test   # compila e roda os testes automáticos
+make clean  # apaga os arquivos compilados
 ```
 
-Other targets: `make debug` compiles with AddressSanitizer and UndefinedBehaviorSanitizer, and `make experimento` runs the cascade experiment described below.
+Outros alvos: `make debug` compila com AddressSanitizer e UndefinedBehaviorSanitizer, e `make experimento` roda o experimento da cascata descrito mais abaixo.
 
-Passing a number to the game (for example `./campo-minado 42`) uses it as the random seed, so the mines are always placed in the same positions. This is useful for testing.
+Ao passar um número para o jogo (por exemplo, `./campo-minado 42`), ele é usado como semente, e as minas são colocadas sempre nas mesmas posições. Isso é útil para testes.
 
-## Rules
+## Regras
 
-- If you reveal a cell that has a mine, you instantly lose.
-- Your first move is always safe: the mines are placed only after it, never on the cell you chose.
-- Every safe cell you reveal shows how many mines are in the 8 cells around it (the 3x3 square centered on it).
-- You can place a flag on a cell you believe hides a mine. A flag is only a reminder: it does not prove there is a mine there, and a flagged cell cannot be revealed until you remove the flag.
-- If a revealed cell has no mines around it, it shows as `.` and its neighbors are revealed automatically. The chain goes on through every neighbor that also has no mines around it and stops at the numbered cells, which are revealed too. Flagged cells are skipped.
-- Above the board, "Mines left" shows the number of mines minus the number of flags you placed.
-- You win when every safe cell has been revealed, so only the mines stay hidden. If the game hasn't ended yet, there are still safe cells to discover.
-- Lines and columns start at 0: the first line, third column is `r 0 2`. The board shows these numbers on its edges.
-- You only have one life, so use it well.
+- Se você revelar uma célula que tem mina, perde na hora.
+- A primeira jogada é sempre segura: as minas só são colocadas depois dela, e nunca na célula escolhida.
+- Cada célula segura revelada mostra quantas minas existem nas 8 células ao seu redor (o quadrado 3x3 centrado nela).
+- Você pode colocar uma bandeira numa célula que acredita esconder uma mina. A bandeira é apenas um lembrete: ela não prova que há uma mina ali, e uma célula com bandeira não pode ser revelada até que a bandeira seja retirada.
+- Se uma célula revelada não tem minas ao redor, ela aparece como `.` e suas vizinhas são reveladas automaticamente. A revelação continua por todas as vizinhas que também não têm minas ao redor e para nas células com números, que também são reveladas. Células com bandeira são ignoradas.
+- Acima do tabuleiro, "Mines left" mostra o número de minas menos o número de bandeiras colocadas.
+- Você vence quando todas as células seguras forem reveladas, ou seja, quando só as minas continuarem escondidas. Se o jogo ainda não terminou, ainda há células seguras a descobrir.
+- Linhas e colunas começam em 0: a primeira linha, terceira coluna é `r 0 2`. O tabuleiro mostra esses números nas bordas.
+- Você só tem uma vida, então use-a bem.
 
-## Commands
+## Comandos
 
-- `r L C` -> reveals the cell at line L, column C.
-- `f L C` -> places a flag on the cell at line L, column C; if there is already a flag there, removes it.
-- `q` -> quits the current game and goes back to the menu.
+- `r L C` -> revela a célula da linha L, coluna C.
+- `f L C` -> coloca uma bandeira na célula da linha L, coluna C; se já houver uma bandeira, ela é retirada.
+- `q` -> sai da partida atual e volta ao menu.
 
-Invalid commands (unknown letters, missing numbers, positions outside the board) show a message and ask again.
+Comandos inválidos (letras desconhecidas, números faltando, posições fora do tabuleiro) mostram uma mensagem e o jogo pede um novo comando.
 
-## Symbols
+## Símbolos
 
-- `#` -> hidden cell: it can be either a mine or a safe cell.
-- `F` -> a flag you placed.
-- `.` -> revealed cell with no mines around it.
-- `1` to `8` -> number of mines around that cell, each number in its own color.
-- `*` -> a mine, shown only when the game ends.
+- `#` -> célula escondida: pode ser uma mina ou uma célula segura.
+- `F` -> uma bandeira colocada por você.
+- `.` -> célula revelada sem minas ao redor.
+- `1` a `8` -> número de minas ao redor daquela célula, cada número com sua própria cor.
+- `*` -> uma mina, mostrada apenas quando o jogo termina.
 
-## Levels
+## Níveis
 
-- Beginner -> 9x9 board, 10 mines.
-- Medium -> 16x16 board, 40 mines.
-- Expert -> 16x30 board, 99 mines.
-- Custom -> you choose the size (2 to 30 lines and columns) and the number of mines (at least one cell must stay safe).
+- Iniciante (Beginner) -> tabuleiro 9x9, 10 minas.
+- Intermediário (Medium) -> tabuleiro 16x16, 40 minas.
+- Especialista (Expert) -> tabuleiro 16x30, 99 minas.
+- Personalizado (Custom) -> você escolhe o tamanho (2 a 30 linhas e colunas) e o número de minas (pelo menos uma célula precisa ficar sem mina).
 
-## Records
+## Recordes
 
-The game measures how long each game takes. When you win on Beginner, Medium or Expert with one of the 5 best times of that level, it asks for your name and saves the time in `recordes.txt`. The menu option "Records" shows the best times of each level, from fastest to slowest.
+O jogo mede o tempo de cada partida. Quando você vence no Iniciante, no Intermediário ou no Especialista com um dos 5 melhores tempos do nível, o jogo pede seu nome e salva o tempo em `recordes.txt`. A opção "Records" do menu mostra os melhores tempos de cada nível, do mais rápido para o mais lento.
 
-## Project structure
+## Estrutura do projeto
 
 ```
 campo-minado/
 ├── src/
-│   ├── celula.h / celula.cpp        Cell ADT
-│   ├── tabuleiro.h / tabuleiro.cpp  Board ADT (mines, cascade, win and loss)
-│   ├── recordes.h / recordes.cpp    Records (top 5 per level, saved in a file)
-│   └── main.cpp                     Menu, game loop and input checking
+│   ├── celula.h / celula.cpp        TAD Célula
+│   ├── tabuleiro.h / tabuleiro.cpp  TAD Tabuleiro (minas, cascata, vitória e derrota)
+│   ├── recordes.h / recordes.cpp    Recordes (5 melhores por nível, salvos em arquivo)
+│   └── main.cpp                     Menu, laço do jogo e verificação da entrada
 ├── testes/
-│   ├── teste_tabuleiro.cpp          Automatic tests with assert
-│   └── jogadas.txt                  Scripted input with valid and invalid moves
-├── experimento.cpp                  Cascade experiment on a 1000x1000 board
+│   ├── teste_tabuleiro.cpp          Testes automáticos com assert
+│   └── jogadas.txt                  Entrada pronta com jogadas válidas e inválidas
+├── experimento.cpp                  Experimento da cascata num tabuleiro 1000x1000
 ├── Makefile
 └── README.md
 ```
 
-To play the scripted moves: `make && ./campo-minado < testes/jogadas.txt`.
+Para rodar as jogadas prontas: `make && ./campo-minado < testes/jogadas.txt`.
 
-## Cascade experiment: recursion vs. queue
+## Experimento da cascata: recursão x fila
 
-The simplest way to write the cascade is with recursion: revealing a cell with no mines around it calls the same function for each neighbor. That works on the normal levels, but `experimento.cpp` builds a 1000x1000 board with a single mine and reveals a corner, which opens almost one million cells in one move. With a recursive cascade the program crashes with a segmentation fault: each call waits for the next one, the chain of calls becomes hundreds of thousands deep, and the call stack (8 MB by default on Linux) runs out.
+A forma mais simples de escrever a cascata é com recursão: revelar uma célula sem minas ao redor chama a mesma função para cada vizinha. Isso funciona nos níveis normais, mas o `experimento.cpp` cria um tabuleiro 1000x1000 com uma única mina e revela um canto, o que abre quase um milhão de células numa só jogada. Com uma cascata recursiva, o programa termina com segmentation fault: cada chamada espera a próxima terminar, a cadeia de chamadas chega a centenas de milhares de níveis, e a pilha de chamadas (8 MB por padrão no Linux) se esgota.
 
-The current version uses a breadth-first search with `std::queue`: cells waiting to be opened go into a queue stored on the heap, so there is no deep chain of calls. On the same board it reveals all 999,999 safe cells in a few tens of milliseconds.
+A versão atual usa uma busca em largura com `std::queue`: as células que ainda precisam ser abertas entram numa fila guardada no heap, então não existe uma cadeia longa de chamadas. No mesmo tabuleiro, ela revela as 999.999 células seguras em algumas dezenas de milissegundos.
 
-## What I learned
+## O que aprendi
 
-- Designing abstract data types (`Celula`, `Tabuleiro`, `Recordes`) and using composition between them.
-- Using `std::vector` for a matrix whose size is only known while the program runs.
-- Generating random positions with `std::mt19937` and a seed, and making the game reproducible.
-- Reading user input safely with `std::getline` and `std::istringstream`.
-- The limits of recursion, and replacing it with a breadth-first search.
-- Measuring time with `std::chrono` and saving data in a text file.
-- Writing tests with `assert`, using a board with mines in known positions.
-- Organizing the build with a Makefile and finding memory errors with sanitizers.
-- Using Git and GitHub: commits, issues, tags and releases.
+- Projetar tipos abstratos de dados (`Celula`, `Tabuleiro`, `Recordes`) e usar composição entre eles.
+- Usar `std::vector` para uma matriz cujo tamanho só é conhecido durante a execução.
+- Gerar posições aleatórias com `std::mt19937` e uma semente, tornando o jogo reproduzível.
+- Ler a entrada do usuário com segurança usando `std::getline` e `std::istringstream`.
+- Os limites da recursão e como substituí-la por uma busca em largura.
+- Medir tempo com `std::chrono` e salvar dados num arquivo de texto.
+- Escrever testes com `assert`, usando um tabuleiro com minas em posições conhecidas.
+- Organizar a compilação com um Makefile e encontrar erros de memória com sanitizers.
+- Usar Git e GitHub: commits, issues, tags e releases.
 
 ## TADs (para o programador)
 
